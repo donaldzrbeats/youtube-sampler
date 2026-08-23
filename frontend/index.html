@@ -21,6 +21,11 @@
       padding: 24px;
       border-radius: 8px;
     }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
     input {
       width: 70%;
       padding: 10px;
@@ -38,16 +43,73 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    #waveform {
+      width: 100%;
+      margin-top: 20px;
+      background: #0f0f11;
+      border-radius: 4px;
+      min-height: 128px;
+    }
   </style>
 </head>
 <body>
   <div class="panel">
     <h2>CloudSampler Web Studio</h2>
-    <div>
+    <div class="controls">
       <input type="text" id="yt-url" placeholder="Paste YouTube link..." />
       <button id="load-btn">Extract Audio</button>
+      <button id="auto-slice-btn">Auto Find Slices</button>
     </div>
+    <div id="waveform"></div>
   </div>
-  <script type="module" src="/src/sampler.js"></script>
+  <script type="module">
+    import WaveSurfer from 'wavesurfer.js';
+    import RegionsPlugin from 'wavesurfer.js/plugins/regions';
+    import { SamplerEngine } from '/src/sampler.js';
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const sampler = new SamplerEngine(audioCtx);
+
+    const wsRegions = RegionsPlugin.create();
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#4F4F4F',
+      progressColor: '#00e5ff',
+      plugins: [wsRegions]
+    });
+
+    window.wavesurfer = wavesurfer;
+    window.sampler = sampler;
+    window.wsRegions = wsRegions;
+
+    const renderSlices = (slices) => {
+      wsRegions.clearRegions();
+      slices.forEach((slice, index) => {
+        const hue = (index * 137.5) % 360;
+        wsRegions.addRegion({
+          id: slice.id,
+          start: slice.start,
+          end: slice.end,
+          color: slice.color || `hsla(${hue}, 70%, 50%, 0.3)`,
+          drag: false,
+          resize: false
+        });
+      });
+    };
+
+    const autoSliceBtn = document.getElementById('auto-slice-btn');
+    autoSliceBtn.addEventListener('click', () => {
+      if (!sampler.buffer) {
+        alert("Please load an audio buffer first.");
+        return;
+      }
+      const slices = sampler.detectTransients(0.3);
+      renderSlices(slices);
+    });
+  </script>
 </body>
 </html>
