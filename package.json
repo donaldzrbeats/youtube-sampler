@@ -1,0 +1,19 @@
+{
+  "name": "youtube-audio-sampler",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite frontend",
+    "build": "vite build frontend",
+    "preview": "vite preview frontend",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "wavesurfer.js": "^7.7.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.0",
+    "vitest": "^1.3.0"
+  }
+}
