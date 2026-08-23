@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "jszip": "^3.10.1",
     "wavesurfer.js": "^7.7.0"
   },
   "devDependencies": {
